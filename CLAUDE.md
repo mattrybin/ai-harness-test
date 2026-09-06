@@ -7,7 +7,7 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 - `app/src/main.ts` — Electron main process. Creates the one window and answers `window.tool` over IPC.
 - `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `get`, `delete`, `list`, `grep`) over `notes/`. `edit` and `delete` need the `checksum` that `get` (or a previous `edit`) returned. Names are `basename`d, so nothing escapes `notes/`. `wipeNotes()` is what Reset calls; it is not a tool. Plain node, no `electron` import: `mcp.js` loads it outside Electron.
 - `app/src/modules/tools.test.ts` — the tool tests. `node --test` against a temp dir, no Electron.
-- `app/src/modules/mcp.ts` — stdio MCP server over the six tools. `claude` spawns it as `node dist/modules/mcp.js <notesDir>`. Five JSON-RPC methods by hand, no dependency.
+- `app/src/modules/mcp.ts` — stdio MCP server over the six tools. `claude` spawns it as `node dist/modules/mcp.js <notesDir>`. JSON-RPC by hand, no dependency.
 - `app/src/modules/mcp.test.ts` — spawns `dist/modules/mcp.js` and talks JSON-RPC to it. `node --test`, no Electron.
 - `app/src/modules/brain.ts` — the brain: one long-lived `claude -p` per conversation, stream-json both ways, the six tools and nothing else. `say(text)` writes a user turn; every event goes to the page; `reset()` kills it and wipes `notes/`. The system prompt lives here.
 - `app/src/preload.ts` — exposes `window.tool(name, args)`, `say(text)`, `resetBrain()` and `onBrain(cb)` to the page.

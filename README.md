@@ -1,6 +1,6 @@
 # ai-harness-test
 
-A minimal Electron app in TypeScript. One window, one renderer page, nothing else.
+A minimal Electron app in TypeScript. One window, one renderer page, and a `claude` process behind it.
 
 ## Why
 
@@ -27,7 +27,7 @@ the root `Makefile` and delegates to `app/Makefile` or a `bin/` script.
 
 `make dev` also starts a local [whisper.cpp](https://github.com/ggml-org/whisper.cpp)
 server at `http://127.0.0.1:8124/v1/audio/transcriptions`, the OpenAI transcription route.
-Hold the mic button to record, release to transcribe; the text becomes a note. macOS only;
+Hold the mic button to record, release to transcribe; the transcript goes to the brain (below). macOS only;
 needs `brew install whisper-cpp ffmpeg`. The first run downloads the 1.6 GB model to
 `models/` (git-ignored). `make stt-model` fetches the model without starting the server.
 `make stt` runs the server on its own; `make dev` then sees the port in use and skips it.

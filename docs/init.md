@@ -40,7 +40,7 @@ Last run: 2026-09-06 · mode: one run · items covered: A1–G5
 | E4 | version agreement | done | CI reads `.tool-versions`; no engines field, no Dockerfile |
 | F1 | `docs/architecture.md` | skipped | minimal app; README covers the shape |
 | F2 | `docs/techstack.md` | skipped | four deps, listed in `app/package.json` |
-| F3 | `docs/dev-setup.md` | skipped | only node is needed; README says so |
+| F3 | `docs/dev-setup.md` | skipped | node, `whisper-cpp`/`ffmpeg` and a logged-in `claude` are needed; README says so |
 | F4 | `docs/UBIQUITOUS_LANGUAGE.md` | skipped | no domain yet |
 | G1 | `.github/workflows/ci.yml` | done | setup-node from `.tool-versions`, then `make ci` |
 | G2 | `Dockerfile` | n/a | desktop app, nothing ships as a container |
