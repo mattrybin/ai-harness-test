@@ -4,7 +4,8 @@
     "module": "nodenext",
     "strict": true,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "moduleDetection": "legacy"
   },
   "include": ["src"]
 }

@@ -1,12 +1,14 @@
 # ai-harness-test
 
-One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no bundler.
+One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no bundler. Tailwind v4 CLI compiles the CSS.
 
 ## Map
 
 - `app/src/main.ts` — Electron main process. Creates the one window.
-- `app/src/index.html` — the renderer page the window loads.
-- `app/dist/` — `tsc` output. Git-ignored. Never edit.
+- `app/src/index.html` — the renderer page the window loads. Tailwind classes, no inline CSS or JS.
+- `app/src/renderer.ts` — the page's script. Compiled as a plain browser script, not a module.
+- `app/src/styles.css` — Tailwind v4 entry. `npm run build:css` compiles it.
+- `app/dist/` — `tsc` and Tailwind output. Git-ignored. Never edit.
 - `app/Makefile` — the app's recipes. The root `Makefile` only delegates, here or to `bin/`.
 - `bin/setup`, `bin/dev`, `bin/stt` — what `make setup`, `make dev`, `make stt` and `make stt-model` call.
 

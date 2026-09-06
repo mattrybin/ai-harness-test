@@ -2,9 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="dark" />
     <title>app</title>
+    <link rel="stylesheet" href="../dist/styles.css" />
   </head>
-  <body>
-    <h1>Hello from Electron</h1>
+  <body
+    class="flex h-screen flex-col bg-neutral-900 font-sans text-[15px] text-neutral-300"
+  >
+    <button
+      id="reset"
+      class="fixed top-4 right-4 cursor-pointer rounded-md border border-neutral-700 px-3 py-1.5 text-neutral-500"
+    >
+      Reset
+    </button>
+    <div
+      id="notes"
+      class="flex flex-1 flex-col gap-3 overflow-auto px-6 pt-16 pb-6"
+    ></div>
+    <div id="live" class="min-h-[60px] px-6 pb-4 text-neutral-500 italic"></div>
+    <button
+      id="talk"
+      title="Hold to talk"
+      class="mb-10 h-24 w-24 cursor-pointer self-center rounded-full bg-sky-700 text-4xl text-white select-none"
+    >
+      🎤
+    </button>
+    <script src="../dist/renderer.js"></script>
   </body>
 </html>
