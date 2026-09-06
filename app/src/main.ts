@@ -5,7 +5,7 @@ function createWindow(): void {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "#171717",
   });
   win.loadFile("src/index.html");
 }

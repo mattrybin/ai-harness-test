@@ -4,16 +4,19 @@
   "private": true,
   "main": "dist/main.js",
   "scripts": {
-    "start": "tsc && electron .",
+    "start": "tsc && npm run build:css && electron .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "precommit": "tsc --noEmit && prettier --write ."
+    "precommit": "tsc --noEmit && prettier --write .",
+    "build:css": "tailwindcss -i src/styles.css -o dist/styles.css"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
     "@types/node": "26.4.1",
     "electron": "44.2.0",
     "prettier": "3.9.6",
+    "tailwindcss": "4.3.3",
     "typescript": "7.0.2"
   }
 }
