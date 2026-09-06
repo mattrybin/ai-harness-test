@@ -2,9 +2,9 @@
 
 ## Matt note
 
-So what I would do next is to create a state machine of this "brain" and add react components as working with html is no super nice.
+So what I would do next is to create a state machine of this "brain" and add react components as working with html is not super nice.
 
-I only worked inside one session as to have one session file to send, normally I would work with many session at once.
+I only worked inside one session as to have one session file to send, normally I would work with many sessions at once.
 
 A minimal Electron app in TypeScript. One window, one hold-to-talk button, and a `claude`
 process behind it that keeps a folder of markdown notes.
