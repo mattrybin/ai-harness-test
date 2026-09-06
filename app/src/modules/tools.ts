@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 // The note tools. Later the AI calls these; today the fake brain in
-// renderer.ts does. Everything lives in <repo>/notes/.
+// renderer.ts does.
 type Args = Record<string, string>;
 type Tools = Record<string, (args: Args) => unknown>;
 
@@ -13,15 +13,14 @@ export function makeTools(dir: string): Tools {
   const file = (name: string) => path.join(dir, name);
   const mdFiles = () => fs.readdirSync(dir).filter((n) => n.endsWith(".md"));
   // first 8 hex chars of sha256 over the file's bytes
-  const sum = (name: string) =>
-    createHash("sha256")
-      .update(fs.readFileSync(file(name)))
-      .digest("hex")
-      .slice(0, 8);
-  const read = (name: string) => ({
-    checksum: sum(name),
-    text: fs.readFileSync(file(name), "utf8"),
-  });
+  const hash = (bytes: Buffer) =>
+    createHash("sha256").update(bytes).digest("hex").slice(0, 8);
+  const sum = (name: string) => hash(fs.readFileSync(file(name)));
+  // one read, so the checksum always describes the text it comes with
+  const read = (name: string) => {
+    const bytes = fs.readFileSync(file(name));
+    return { checksum: hash(bytes), text: bytes.toString("utf8") };
+  };
   // edit and delete only run with the checksum from the last get or edit
   const check = (name: string, checksum: string | undefined) => {
     if (!checksum)
@@ -63,7 +62,8 @@ export function makeTools(dir: string): Tools {
   };
 }
 
-// answers window.tool(name, args) from preload.ts
+// answers window.tool(name, args) from preload.ts. Everything lives in
+// <repo>/notes/.
 export function registerTools(): void {
   const notes = path.join(app.getAppPath(), "..", "notes");
   fs.mkdirSync(notes, { recursive: true });
