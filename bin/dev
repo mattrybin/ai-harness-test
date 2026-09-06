@@ -1,5 +1,15 @@
 #!/bin/sh
-# Starts the app the way `make dev` does. Foreground; Ctrl-C stops it.
+# Starts the app the way `make dev` does, with the STT server beside it.
+# Foreground; Ctrl-C stops both. Skips the server when the port is taken,
+# so `make stt` in another terminal keeps working.
 set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); cd "$root"
-exec make -C app server
+port="${STT_PORT:-8124}"
+if lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+  echo "dev: something already listens on $port, not starting bin/stt"
+else
+  bin/stt & stt=$!
+  # bin/stt execs whisper-server, so this pid is the server itself
+  trap 'kill "$stt" 2>/dev/null' EXIT INT TERM
+fi
+make -C app server
