@@ -126,3 +126,9 @@ test("delete with a stale checksum is refused and the file stays", () => {
   );
   assert.equal(read("a.md"), "milk\n");
 });
+
+test("a name with a path lands in the notes dir", () => {
+  tools.create({ name: "../escape.md" });
+  assert.equal(read("escape.md"), "");
+  assert.ok(!fs.existsSync(path.join(dir, "..", "escape.md")));
+});
