@@ -22,9 +22,13 @@ let nextId: number;
 
 beforeEach(() => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), "notes-"));
-  server = spawn(process.execPath, [path.join(__dirname, "mcp.js"), dir], {
-    stdio: ["pipe", "pipe", "inherit"],
-  });
+  server = spawn(
+    process.execPath,
+    [path.join(__dirname, "../modules/mcp.js"), dir],
+    {
+      stdio: ["pipe", "pipe", "inherit"],
+    },
+  );
   replies = new Map();
   nextId = 1;
   readline.createInterface({ input: server.stdout! }).on("line", (line) => {
@@ -116,7 +120,7 @@ test("an unknown method is a JSON-RPC method-not-found error", async () => {
 // prints "Downloading Electron binary..." to stdout when the binary is
 // missing, which breaks the JSON-RPC stream.
 test("mcp.js never loads the electron package", () => {
-  const probe = `require(${JSON.stringify(path.join(__dirname, "mcp.js"))});
+  const probe = `require(${JSON.stringify(path.join(__dirname, "../modules/mcp.js"))});
     console.log(Object.keys(require.cache).some((k) => k.includes("node_modules/electron")));`;
   const out = spawnSync(process.execPath, ["-e", probe], { input: "" });
   assert.equal(out.stdout.toString().trim(), "false");

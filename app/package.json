@@ -10,7 +10,7 @@
     "format:check": "prettier --check .",
     "precommit": "tsc --noEmit && prettier --write .",
     "build:css": "tailwindcss -i src/styles.css -o dist/styles.css",
-    "test": "tsc && node --test dist/modules/*.test.js"
+    "test": "tsc && node --test dist/test/*.test.js"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",
