@@ -27,7 +27,6 @@ const transcribe = async (blob: Blob) => {
   return (await res.text()).trim();
 };
 
-// while held: record the mic
 talk.onpointerdown = async () => {
   if (held) return;
   held = true;
@@ -65,7 +64,6 @@ talk.onpointerdown = async () => {
   recorder.start();
 };
 
-// on release: stop recording, the transcript goes to the brain
 const release = () => {
   if (!held) return;
   held = false;
