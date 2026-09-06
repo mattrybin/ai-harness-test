@@ -93,12 +93,15 @@ const refreshFiles = async () => {
 let current: HTMLElement | null = null;
 let done: (() => void) | null = null;
 // tool_use lines by block id, so the tool_result can fill them in
-const pending = new Map<string, { name: string; line: HTMLElement }>();
+const pending = new Map<
+  string,
+  { name: string; head: string; line: HTMLElement }
+>();
 
-const resultText = (content: Block & { type: "tool_result" }) =>
-  typeof content.content === "string"
-    ? content.content
-    : content.content.map((c) => c.text).join("\n");
+const resultText = (block: Block & { type: "tool_result" }) =>
+  typeof block.content === "string"
+    ? block.content
+    : block.content.map((c) => c.text).join("\n");
 
 onBrain((event) => {
   const box = current;
@@ -111,19 +114,18 @@ onBrain((event) => {
       );
     } else if (block.type === "tool_use") {
       const name = block.name.replace(/^mcp__notes__/, "");
-      const argText = JSON.stringify(block.input);
-      const line = addLine(box, `${name}(${argText}) …`, "border-sky-700");
-      pending.set(block.id, { name, line });
+      const head = `${name}(${JSON.stringify(block.input)})`;
+      const line = addLine(box, `${head} …`, "border-sky-700");
+      pending.set(block.id, { name, head, line });
     } else if (block.type === "tool_result") {
       const use = pending.get(block.tool_use_id);
       pending.delete(block.tool_use_id);
       if (!use) continue;
-      const head = use.line.textContent!.replace(/ …$/, "");
       if (block.is_error) {
-        use.line.textContent = `${head}\n✗ ${resultText(block)}`;
+        use.line.textContent = `${use.head}\n✗ ${resultText(block)}`;
         use.line.classList.replace("border-sky-700", "border-red-500");
       } else {
-        use.line.textContent = `${head}\n→ ${show(use.name, resultText(block))}`;
+        use.line.textContent = `${use.head}\n→ ${show(use.name, resultText(block))}`;
       }
       refreshFiles();
     }
@@ -137,10 +139,10 @@ onBrain((event) => {
 
 // one utterance: a box, one turn to the brain, resolved when its result lands
 const act = (said: string) =>
-  new Promise<void>((resolve) => {
+  new Promise<void>((resolve, reject) => {
     current = addBox(said);
     done = resolve;
-    say(said);
+    say(said).catch(reject);
   });
 
 refreshFiles().catch((err: Error) => {

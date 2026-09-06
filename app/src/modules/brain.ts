@@ -12,12 +12,12 @@ const SYSTEM_PROMPT = `You keep a folder of short markdown notes for one person.
 The person can only speak to you, through a speech-to-text model, so words are sometimes wrong, names are misspelled, and there is no punctuation. Read for intent, pick the most likely file and action, and do it. Never ask a question. If you are unsure, do the most likely thing and say what you did in one short sentence so the person can correct you by speaking again. Call list first when you do not know which file they mean.
 Reply in one or two plain sentences. No markdown, no backticks, no checksums.`;
 
-type Event = Record<string, unknown>;
+type BrainEvent = Record<string, unknown>;
 
 // wires ipc "say" and "reset" for win; notes is the directory the tools run over
 export function registerBrain(win: BrowserWindow, notes: string): void {
   let claude: ChildProcess | null = null;
-  const send = (event: Event) => win.webContents.send("brain", event);
+  const send = (event: BrainEvent) => win.webContents.send("brain", event);
 
   const start = (): ChildProcess => {
     const mcp = {
@@ -59,7 +59,7 @@ export function registerBrain(win: BrowserWindow, notes: string): void {
     const live = () => claude === child;
     readline.createInterface({ input: child.stdout! }).on("line", (line) => {
       if (!live()) return;
-      if (line.startsWith("{")) send(JSON.parse(line) as Event);
+      if (line.startsWith("{")) send(JSON.parse(line) as BrainEvent);
       else console.error(`claude: ${line}`);
     });
     child.stderr!.on("data", (data) => console.error(`claude: ${data}`));
