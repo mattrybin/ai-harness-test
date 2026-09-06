@@ -15,10 +15,20 @@
     >
       Reset
     </button>
-    <div
-      id="notes"
-      class="flex flex-1 flex-col gap-3 overflow-auto px-6 pt-16 pb-6"
-    ></div>
+    <div class="flex flex-1 overflow-hidden">
+      <div
+        id="notes"
+        class="flex flex-1 flex-col gap-3 overflow-auto px-6 pt-16 pb-6"
+      ></div>
+      <div
+        class="flex w-64 flex-col gap-2 overflow-auto border-l border-neutral-800 px-4 pt-16 pb-6"
+      >
+        <div class="text-xs tracking-wide text-neutral-500 uppercase">
+          notes/
+        </div>
+        <div id="files" class="flex flex-col gap-2 font-mono text-sm"></div>
+      </div>
+    </div>
     <div id="live" class="min-h-[60px] px-6 pb-4 text-neutral-500 italic"></div>
     <button
       id="talk"
@@ -28,5 +38,6 @@
       🎤
     </button>
     <script src="../dist/renderer.js"></script>
+    <script src="../dist/modules/listen.js"></script>
   </body>
 </html>

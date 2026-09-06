@@ -5,8 +5,12 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 ## Map
 
 - `app/src/main.ts` — Electron main process. Creates the one window.
+- `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `get`, `delete`, `list`, `grep`) over `notes/`, served over IPC.
+- `app/src/preload.ts` — exposes `window.tool(name, args)` to the page.
 - `app/src/index.html` — the renderer page the window loads. Tailwind classes, no inline CSS or JS.
-- `app/src/renderer.ts` — the page's script. Compiled as a plain browser script, not a module.
+- `app/src/modules/listen.ts` — hold-to-talk: mic recording and the STT call. Hands the transcript to `act()`.
+- `app/src/renderer.ts` — the brain and the tool log. Both page scripts are classic browser scripts, not ES modules, and share one global scope.
+- `notes/` — files the app writes at runtime. Git-ignored.
 - `app/src/styles.css` — Tailwind v4 entry. `npm run build:css` compiles it.
 - `app/dist/` — `tsc` and Tailwind output. Git-ignored. Never edit.
 - `app/Makefile` — the app's recipes. The root `Makefile` only delegates, here or to `bin/`.
@@ -29,3 +33,4 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 - Run `make precommit` before every commit.
 - Exact versions in `app/package.json`. No `^`, no `~`. Update deps on purpose.
 - Keep it minimal. A new dependency needs a reason written in the PR.
+- The only input is the hold-to-talk button. No text input, no "type it instead" fallback, not even for testing.
