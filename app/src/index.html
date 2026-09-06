@@ -2,9 +2,154 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="dark" />
     <title>app</title>
+    <style>
+      :root {
+        --bg: #1e1e1e;
+        --panel: #252526;
+        --border: #3c3c3c;
+        --text: #d4d4d4;
+        --muted: #8b8b8b;
+        --accent: #4fc1ff;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          14px/1.5 -apple-system,
+          "Segoe UI",
+          sans-serif;
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        height: 100vh;
+      }
+      nav {
+        background: var(--panel);
+        border-right: 1px solid var(--border);
+        padding: 12px;
+      }
+      nav h2 {
+        margin: 0 0 12px;
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+      nav a {
+        display: block;
+        color: var(--text);
+        text-decoration: none;
+        padding: 6px 8px;
+        border-radius: 4px;
+      }
+      nav a.active {
+        background: #37373d;
+        color: var(--accent);
+      }
+      main {
+        padding: 24px;
+        overflow: auto;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+      .sub {
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .ok {
+        color: #89d185;
+      }
+      .warn {
+        color: #cca700;
+      }
+      .err {
+        color: #f14c4c;
+      }
+      button {
+        background: #0e639c;
+        color: #fff;
+        border: 0;
+        padding: 6px 12px;
+        border-radius: 4px;
+      }
+    </style>
   </head>
   <body>
-    <h1>Hello from Electron</h1>
+    <nav>
+      <h2>Harness</h2>
+      <a class="active" href="#">Runs</a>
+      <a href="#">Models</a>
+      <a href="#">Speech</a>
+      <a href="#">Settings</a>
+    </nav>
+    <main>
+      <h1>Runs</h1>
+      <div class="sub">Dummy data. 6 rows.</div>
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Model</th>
+          <th>Status</th>
+          <th>Time</th>
+        </tr>
+        <tr>
+          <td>whisper smoke test</td>
+          <td>ggml-large-v3</td>
+          <td class="ok">ok</td>
+          <td>1.2s</td>
+        </tr>
+        <tr>
+          <td>
+            long dictation, background noise, two speakers talking over each
+            other
+          </td>
+          <td>ggml-large-v3</td>
+          <td class="warn">slow</td>
+          <td>48.7s</td>
+        </tr>
+        <tr>
+          <td>empty audio</td>
+          <td>ggml-large-v3</td>
+          <td class="err">failed</td>
+          <td>0.1s</td>
+        </tr>
+        <tr>
+          <td>french sample</td>
+          <td>ggml-medium</td>
+          <td class="ok">ok</td>
+          <td>3.4s</td>
+        </tr>
+        <tr>
+          <td>numbers and dates</td>
+          <td>ggml-medium</td>
+          <td class="ok">ok</td>
+          <td>2.0s</td>
+        </tr>
+        <tr>
+          <td>model missing</td>
+          <td>ggml-tiny</td>
+          <td class="err">failed</td>
+          <td>—</td>
+        </tr>
+      </table>
+      <p><button>New run</button></p>
+    </main>
   </body>
 </html>
