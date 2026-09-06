@@ -58,7 +58,7 @@ was made for.
 
 ## Structure
 
-- `app/` — the Electron app (main process in `src/main.ts`, renderer in `src/index.html`,
-  everything else in `src/modules/`)
+- `app/` — the Electron app (main process in `src/main.ts`, page in `src/index.html` and
+  `src/renderer.ts`, the modules in `src/modules/`, tests in `src/test/`)
 - `bin/` — `setup`, `dev` and `stt`, the scripts a human runs directly
 - `notes/` — the files the app writes at runtime, git-ignored
