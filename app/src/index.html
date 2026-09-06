@@ -79,7 +79,7 @@
     <button id="reset">Reset</button>
     <div id="notes"></div>
     <div id="live"></div>
-    <button id="talk">🎤</button>
+    <button id="talk" title="Hold to talk">🎤</button>
     <script>
       const SAMPLES = [
         "Remind me to call the dentist tomorrow at nine.",
@@ -94,28 +94,36 @@
       const live = document.getElementById("live");
       const notes = document.getElementById("notes");
 
-      talk.onclick = () => {
-        if (!speaking) {
-          speaking = true;
-          talk.classList.add("on");
-          const text = SAMPLES[sampleIndex++ % SAMPLES.length];
-          let i = 0;
-          live.textContent = "";
-          timer = setInterval(() => {
-            live.textContent = text.slice(0, ++i);
-            if (i >= text.length) clearInterval(timer);
-          }, 40);
-        } else {
-          speaking = false;
-          talk.classList.remove("on");
-          clearInterval(timer);
+      function startTalking() {
+        if (speaking) return;
+        speaking = true;
+        talk.classList.add("on");
+        const text = SAMPLES[sampleIndex++ % SAMPLES.length];
+        let i = 0;
+        live.textContent = "";
+        timer = setInterval(() => {
+          live.textContent = text.slice(0, ++i);
+          if (i >= text.length) clearInterval(timer);
+        }, 40);
+      }
+
+      function stopTalking() {
+        if (!speaking) return;
+        speaking = false;
+        talk.classList.remove("on");
+        clearInterval(timer);
+        if (live.textContent) {
           const box = document.createElement("div");
           box.className = "note";
           box.textContent = live.textContent;
           notes.appendChild(box);
-          live.textContent = "";
         }
-      };
+        live.textContent = "";
+      }
+
+      talk.onpointerdown = startTalking;
+      talk.onpointerup = stopTalking;
+      talk.onpointerleave = stopTalking;
 
       document.getElementById("reset").onclick = () => {
         speaking = false;
