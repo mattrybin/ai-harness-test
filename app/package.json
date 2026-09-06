@@ -1,0 +1,19 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "tsc && electron .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "precommit": "tsc --noEmit && prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "26.4.1",
+    "electron": "44.2.0",
+    "prettier": "3.9.6",
+    "typescript": "7.0.2"
+  }
+}
