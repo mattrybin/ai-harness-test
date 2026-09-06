@@ -22,15 +22,23 @@ export function makeTools(dir: string): Tools {
     checksum: sum(name),
     text: fs.readFileSync(file(name), "utf8"),
   });
+  // edit and delete only run with the checksum from the last get or edit
+  const check = (name: string, checksum: string | undefined) => {
+    if (!checksum)
+      throw new Error(`${name}: checksum required, get the file first`);
+    if (checksum !== sum(name))
+      throw new Error(`${name}: checksum stale, get the file again`);
+  };
 
   return {
     create: ({ name }) => {
       fs.writeFileSync(file(name), "", { flag: "wx" });
       return `created ${name}`;
     },
-    edit: ({ name, text }) => {
+    edit: ({ name, text, checksum }) => {
+      check(name, checksum);
       fs.appendFileSync(file(name), text + "\n");
-      return `${name} is now:\n${fs.readFileSync(file(name), "utf8")}`;
+      return read(name);
     },
     delete: ({ name }) => {
       fs.unlinkSync(file(name));
