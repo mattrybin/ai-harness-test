@@ -1,4 +1,5 @@
 import { app, ipcMain } from "electron";
+import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -11,6 +12,16 @@ type Tools = Record<string, (args: Args) => unknown>;
 export function makeTools(dir: string): Tools {
   const file = (name: string) => path.join(dir, name);
   const mdFiles = () => fs.readdirSync(dir).filter((n) => n.endsWith(".md"));
+  // first 8 hex chars of sha256 over the file's bytes
+  const sum = (name: string) =>
+    createHash("sha256")
+      .update(fs.readFileSync(file(name)))
+      .digest("hex")
+      .slice(0, 8);
+  const read = (name: string) => ({
+    checksum: sum(name),
+    text: fs.readFileSync(file(name), "utf8"),
+  });
 
   return {
     create: ({ name }) => {
@@ -25,7 +36,7 @@ export function makeTools(dir: string): Tools {
       fs.unlinkSync(file(name));
       return `deleted ${name}`;
     },
-    get: ({ name }) => fs.readFileSync(file(name), "utf8"),
+    get: ({ name }) => read(name),
     list: () =>
       mdFiles().map((name) => ({ name, size: fs.statSync(file(name)).size })),
     grep: ({ query }) => {

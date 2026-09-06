@@ -33,10 +33,23 @@ test("edit appends one line", () => {
   assert.equal(read("a.md"), "milk\neggs\n");
 });
 
-test("get returns the text", () => {
+type Got = { checksum: string; text: string };
+const HEX8 = /^[0-9a-f]{8}$/;
+
+test("get returns the text with an 8-hex checksum", () => {
   tools.create({ name: "a.md" });
   tools.edit({ name: "a.md", text: "milk" });
-  assert.equal(tools.get({ name: "a.md" }), "milk\n");
+  const got = tools.get({ name: "a.md" }) as Got;
+  assert.equal(got.text, "milk\n");
+  assert.match(got.checksum, HEX8);
+});
+
+test("checksum changes when the text changes", () => {
+  tools.create({ name: "a.md" });
+  const before = (tools.get({ name: "a.md" }) as Got).checksum;
+  tools.edit({ name: "a.md", text: "milk" });
+  const after = (tools.get({ name: "a.md" }) as Got).checksum;
+  assert.notEqual(before, after);
 });
 
 test("list names each .md file with its size", () => {
