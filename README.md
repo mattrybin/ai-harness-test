@@ -10,7 +10,7 @@ harness is the thing under test, not the app.
 ## Structure
 
 - `app/` — the Electron app (main process in `src/main.ts`, renderer in `src/index.html`)
-- `bin/` — `setup` and `dev`, the two scripts a human runs directly
+- `bin/` — `setup`, `dev` and `stt`, the scripts a human runs directly
 - `docs/` — [init state](docs/init.md) and any further notes
 
 ## Quick start
@@ -21,4 +21,12 @@ make dev
 ```
 
 `make precommit` runs the local gate. `make ci` runs what CI runs. Every target lives in
-the root `Makefile` and delegates to `app/Makefile`.
+the root `Makefile` and delegates to `app/Makefile` or a `bin/` script.
+
+## Speech to text
+
+`make stt` runs a local [whisper.cpp](https://github.com/ggml-org/whisper.cpp) server at
+`http://127.0.0.1:8124/v1/audio/transcriptions`, the OpenAI transcription route. macOS
+only; needs `brew install whisper-cpp ffmpeg`. The first run downloads the 1.6 GB model to
+`models/` (git-ignored). `make stt-model` fetches the model without starting the server.
+`STT_PORT` overrides the port.

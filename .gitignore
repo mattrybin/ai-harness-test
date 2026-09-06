@@ -5,6 +5,9 @@ node_modules/
 app/dist/
 app/out/
 
+# stt model, 1.6 GB, fetched by bin/stt
+models/
+
 # env
 .env
 .env.*
