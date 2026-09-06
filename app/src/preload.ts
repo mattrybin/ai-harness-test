@@ -1,23 +1,20 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-// window.tool(name, args) → runs the named tool in main.ts
+// The page's window API. "tool" is answered in main.ts, the rest in brain.ts.
 contextBridge.exposeInMainWorld(
   "tool",
   (name: string, args?: Record<string, string>) =>
     ipcRenderer.invoke("tool", name, args),
 );
 
-// window.say(text) → one user turn to the brain in brain.ts
 contextBridge.exposeInMainWorld("say", (text: string) =>
   ipcRenderer.invoke("say", text),
 );
 
-// window.resetBrain() → kill the brain and wipe notes/
 contextBridge.exposeInMainWorld("resetBrain", () =>
   ipcRenderer.invoke("reset"),
 );
 
-// window.onBrain(cb) → cb gets every event the brain prints
 contextBridge.exposeInMainWorld(
   "onBrain",
   (cb: (event: Record<string, unknown>) => void) =>
