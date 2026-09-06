@@ -7,7 +7,6 @@ const notes = document.getElementById("notes") as HTMLDivElement;
 const reset = document.getElementById("reset") as HTMLButtonElement;
 const files = document.getElementById("files") as HTMLDivElement;
 
-// exposed by preload.ts
 declare const tool: (
   name: string,
   args?: Record<string, string>,
