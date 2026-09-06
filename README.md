@@ -11,7 +11,6 @@ harness is the thing under test, not the app.
 
 - `app/` — the Electron app (main process in `src/main.ts`, renderer in `src/index.html`)
 - `bin/` — `setup`, `dev` and `stt`, the scripts a human runs directly
-- `docs/` — [init state](docs/init.md) and any further notes
 
 ## Quick start
 
