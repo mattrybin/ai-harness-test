@@ -1,5 +1,7 @@
-// The brain and the tool log. Plain browser script: act() is called from
-// listen.js, tool() comes from preload.ts.
+// The tool log. Plain browser script: act() is called from listen.js;
+// tool(), say(), resetBrain() and onBrain() come from preload.ts.
+// act() sends the transcript to the brain; the brain's events render
+// under the box until its result arrives.
 
 const notes = document.getElementById("notes") as HTMLDivElement;
 const reset = document.getElementById("reset") as HTMLButtonElement;
@@ -10,8 +12,32 @@ declare const tool: (
   name: string,
   args?: Record<string, string>,
 ) => Promise<unknown>;
+declare const say: (text: string) => Promise<void>;
+declare const resetBrain: () => Promise<void>;
+declare const onBrain: (cb: (event: BrainEvent) => void) => void;
+
 type Entry = { name: string; size: number };
 type Got = { checksum: string; text: string };
+type Block =
+  | { type: "text"; text: string }
+  | {
+      type: "tool_use";
+      id: string;
+      name: string;
+      input: Record<string, string>;
+    }
+  | {
+      type: "tool_result";
+      tool_use_id: string;
+      content: string | { type: string; text: string }[];
+      is_error?: boolean;
+    };
+type BrainEvent = {
+  type: string;
+  message?: { content: Block[] };
+  is_error?: boolean;
+  result?: string;
+};
 
 const addBox = (text: string) => {
   const box = document.createElement("div");
@@ -22,45 +48,31 @@ const addBox = (text: string) => {
   return box;
 };
 
-const show = (name: string, result: unknown): string => {
+// the result text of one tool, formatted for the log
+const show = (name: string, text: string): string => {
   if (name === "list") {
-    const entries = result as Entry[];
+    const entries = JSON.parse(text) as Entry[];
     return entries.length
       ? entries.map((e) => `${e.name} (${e.size} B)`).join("\n")
       : "(no files)";
   }
   if (name === "get" || name === "edit") {
-    const got = result as Got;
+    const got = JSON.parse(text) as Got;
     return `checksum: ${got.checksum}\n${got.text}`;
   }
   if (name === "grep") {
-    const hits = result as string[];
+    const hits = JSON.parse(text) as string[];
     return hits.length ? hits.join("\n") : "(no matches)";
   }
-  return String(result);
+  return text;
 };
 
-// one tool call: run it, print "name(args) → result" under the box
-const call = async (
-  box: HTMLElement,
-  name: string,
-  args?: Record<string, string>,
-) => {
+const addLine = (box: HTMLElement, text: string, color: string) => {
   const line = document.createElement("pre");
-  line.className =
-    "mt-2 whitespace-pre-wrap border-l-2 border-sky-700 pl-3 font-mono text-xs text-neutral-400";
-  const argText = args ? JSON.stringify(args) : "";
-  line.textContent = `${name}(${argText}) …`;
+  line.className = `mt-2 whitespace-pre-wrap border-l-2 ${color} pl-3 font-mono text-xs text-neutral-400`;
+  line.textContent = text;
   box.appendChild(line);
-  try {
-    const result = await tool(name, args);
-    line.textContent = `${name}(${argText})\n→ ${show(name, result)}`;
-    return result;
-  } catch (err) {
-    line.textContent = `${name}(${argText})\n✗ ${(err as Error).message}`;
-    line.classList.replace("border-sky-700", "border-red-500");
-    throw err;
-  }
+  return line;
 };
 
 const refreshFiles = async () => {
@@ -77,37 +89,74 @@ const refreshFiles = async () => {
   }
 };
 
-// FAKE BRAIN. Stands in for the AI. Ignores what was said and walks
-// shopping.md through: create → (get, fill) → (grep, get, delete).
-// edit and delete need the checksum from get, so get always comes first.
-const act = async (said: string) => {
-  const box = addBox(said);
-  const entries = (await call(box, "list")) as Entry[];
-  const shopping = entries.find((e) => e.name === "shopping.md");
-  if (!shopping) {
-    await call(box, "create", { name: "shopping.md" });
-  } else if (shopping.size === 0) {
-    const got = (await call(box, "get", { name: "shopping.md" })) as Got;
-    await call(box, "edit", {
-      name: "shopping.md",
-      text: said,
-      checksum: got.checksum,
-    });
-  } else {
-    await call(box, "grep", { query: said.split(" ")[0] });
-    const got = (await call(box, "get", { name: "shopping.md" })) as Got;
-    await call(box, "delete", { name: "shopping.md", checksum: got.checksum });
+// the box the brain is answering right now, and how to end its turn
+let current: HTMLElement | null = null;
+let done: (() => void) | null = null;
+// tool_use lines by block id, so the tool_result can fill them in
+const pending = new Map<
+  string,
+  { name: string; head: string; line: HTMLElement }
+>();
+
+const resultText = (block: Block & { type: "tool_result" }) =>
+  typeof block.content === "string"
+    ? block.content
+    : block.content.map((c) => c.text).join("\n");
+
+onBrain((event) => {
+  const box = current;
+  if (!box) return;
+  for (const block of event.message?.content ?? []) {
+    if (block.type === "text") {
+      addLine(box, block.text, "border-neutral-600").classList.replace(
+        "font-mono",
+        "font-sans",
+      );
+    } else if (block.type === "tool_use") {
+      const name = block.name.replace(/^mcp__notes__/, "");
+      const head = `${name}(${JSON.stringify(block.input)})`;
+      const line = addLine(box, `${head} …`, "border-sky-700");
+      pending.set(block.id, { name, head, line });
+    } else if (block.type === "tool_result") {
+      const use = pending.get(block.tool_use_id);
+      pending.delete(block.tool_use_id);
+      if (!use) continue;
+      if (block.is_error) {
+        use.line.textContent = `${use.head}\n✗ ${resultText(block)}`;
+        use.line.classList.replace("border-sky-700", "border-red-500");
+      } else {
+        use.line.textContent = `${use.head}\n→ ${show(use.name, resultText(block))}`;
+      }
+      refreshFiles();
+    }
   }
-  await refreshFiles();
-  box.scrollIntoView({ block: "end" });
-};
+  if (event.type === "result") {
+    if (event.is_error) addLine(box, `✗ ${event.result}`, "border-red-500");
+    box.scrollIntoView({ block: "end" });
+    done?.();
+  }
+});
+
+// one utterance: a box, one turn to the brain, resolved when its result lands
+const act = (said: string) =>
+  new Promise<void>((resolve, reject) => {
+    current = addBox(said);
+    done = resolve;
+    say(said).catch(reject);
+  });
 
 refreshFiles().catch((err: Error) => {
   live.textContent = `${err.name}: ${err.message}`;
 });
 
-reset.onclick = () => {
+reset.onclick = async () => {
   release();
+  current = null;
+  done?.();
+  done = null;
+  pending.clear();
   notes.innerHTML = "";
   live.textContent = "";
+  await resetBrain();
+  await refreshFiles();
 };

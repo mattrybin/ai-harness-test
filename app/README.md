@@ -1,6 +1,6 @@
 # app
 
-Minimal Electron app in TypeScript. `src/main.ts` opens one window that loads `src/index.html`.
+Minimal Electron app in TypeScript. `src/main.ts` opens one window that loads `src/index.html` and wires the brain (`src/modules/brain.ts`).
 
 ```sh
 make install   # npm ci

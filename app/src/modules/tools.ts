@@ -1,16 +1,17 @@
-import { app, ipcMain } from "electron";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-// The note tools. Later the AI calls these; today the fake brain in
-// renderer.ts does.
+// The note tools. The brain (claude, see brain.ts) calls these over the
+// MCP server in mcp.ts; the page calls list over IPC (main.ts). Plain node:
+// mcp.js runs this outside Electron, so nothing here may import electron.
 type Args = Record<string, string>;
 type Tools = Record<string, (args: Args) => unknown>;
 
 // The six tools over one flat directory of .md files.
 export function makeTools(dir: string): Tools {
-  const file = (name: string) => path.join(dir, name);
+  // basename keeps every name inside dir, so "../x.md" cannot escape
+  const file = (name: string) => path.join(dir, path.basename(name));
   const mdFiles = () => fs.readdirSync(dir).filter((n) => n.endsWith(".md"));
   // first 8 hex chars of sha256 over the file's bytes
   const hash = (bytes: Buffer) =>
@@ -62,15 +63,9 @@ export function makeTools(dir: string): Tools {
   };
 }
 
-// answers window.tool(name, args) from preload.ts. Everything lives in
-// <repo>/notes/.
-export function registerTools(): void {
-  const notes = path.join(app.getAppPath(), "..", "notes");
-  fs.mkdirSync(notes, { recursive: true });
-  const tools = makeTools(notes);
-  ipcMain.handle("tool", (_e, name: string, args: Args = {}) => {
-    const run = tools[name];
-    if (!run) throw new Error(`no tool named ${name}`);
-    return run(args);
-  });
+// deletes every note in dir. Reset calls this; it is not a tool, so the
+// model cannot.
+export function wipeNotes(dir: string): void {
+  for (const name of fs.readdirSync(dir))
+    if (name.endsWith(".md")) fs.unlinkSync(path.join(dir, name));
 }
