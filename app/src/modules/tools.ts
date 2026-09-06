@@ -1,10 +1,10 @@
-import { app, ipcMain } from "electron";
 import { createHash } from "node:crypto";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
 // The note tools. The brain (claude, see brain.ts) calls these over the
-// MCP server in mcp.ts; the page calls list over IPC.
+// MCP server in mcp.ts; the page calls list over IPC (main.ts). Plain node:
+// mcp.js runs this outside Electron, so nothing here may import electron.
 type Args = Record<string, string>;
 type Tools = Record<string, (args: Args) => unknown>;
 
@@ -61,20 +61,6 @@ export function makeTools(dir: string): Tools {
       return hits;
     },
   };
-}
-
-// answers window.tool(name, args) from preload.ts. Everything lives in
-// <repo>/notes/; returns that directory.
-export function registerTools(): string {
-  const notes = path.join(app.getAppPath(), "..", "notes");
-  fs.mkdirSync(notes, { recursive: true });
-  const tools = makeTools(notes);
-  ipcMain.handle("tool", (_e, name: string, args: Args = {}) => {
-    const run = tools[name];
-    if (!run) throw new Error(`no tool named ${name}`);
-    return run(args);
-  });
-  return notes;
 }
 
 // deletes every note in dir. Reset calls this; it is not a tool, so the

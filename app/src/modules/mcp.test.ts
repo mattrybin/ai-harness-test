@@ -1,6 +1,6 @@
 import { test, beforeEach, afterEach } from "node:test";
 import * as assert from "node:assert/strict";
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -110,4 +110,14 @@ test("a tool error comes back as isError with the message", async () => {
 test("an unknown method is a JSON-RPC method-not-found error", async () => {
   const reply = await request("resources/list");
   assert.equal(reply.error?.code, -32601);
+});
+
+// claude runs mcp.js under plain node. Loading the electron package there
+// prints "Downloading Electron binary..." to stdout when the binary is
+// missing, which breaks the JSON-RPC stream.
+test("mcp.js never loads the electron package", () => {
+  const probe = `require(${JSON.stringify(path.join(__dirname, "mcp.js"))});
+    console.log(Object.keys(require.cache).some((k) => k.includes("node_modules/electron")));`;
+  const out = spawnSync(process.execPath, ["-e", probe], { input: "" });
+  assert.equal(out.stdout.toString().trim(), "false");
 });
