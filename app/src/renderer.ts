@@ -1,9 +1,4 @@
-const SAMPLES = [
-  "Remind me to call the dentist tomorrow at nine.",
-  "Okay so the idea is we keep the harness tiny and only add one thing per step.",
-  "Buy milk, eggs, and the good coffee, not the cheap one.",
-  "Meeting notes: Sam owns the deploy, Priya owns the tests, I own the writeup.",
-];
+const STT_URL = "http://127.0.0.1:8124/v1/audio/transcriptions";
 
 const talk = document.getElementById("talk") as HTMLButtonElement;
 const live = document.getElementById("live") as HTMLDivElement;
@@ -13,37 +8,76 @@ const reset = document.getElementById("reset") as HTMLButtonElement;
 const HELD = ["bg-red-500", "animate-ring"];
 const IDLE = ["bg-sky-700"];
 
-let timer: ReturnType<typeof setInterval> | null = null;
+let held = false;
+let recorder: MediaRecorder | null = null;
 
-// while held: keep feeding words in, sentence after sentence
-talk.onpointerdown = () => {
-  if (timer) return;
-  talk.classList.remove(...IDLE);
-  talk.classList.add(...HELD);
-  const words = SAMPLES.join(" ").split(" ");
-  let i = 0;
-  live.textContent = "";
-  timer = setInterval(() => {
-    live.textContent += (i ? " " : "") + words[i % words.length];
-    i++;
-  }, 180);
-};
-
-// on release: what was said becomes a box
-const release = () => {
-  if (!timer) return;
-  clearInterval(timer);
-  timer = null;
+const setIdle = () => {
   talk.classList.remove(...HELD);
   talk.classList.add(...IDLE);
-  if (live.textContent) {
-    const box = document.createElement("div");
-    box.className =
-      "rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-3";
-    box.textContent = live.textContent;
-    notes.appendChild(box);
+};
+
+const addBox = (text: string) => {
+  const box = document.createElement("div");
+  box.className =
+    "rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-3";
+  box.textContent = text;
+  notes.appendChild(box);
+};
+
+const transcribe = async (blob: Blob) => {
+  const body = new FormData();
+  body.append("file", blob, "hold.webm");
+  body.append("response_format", "text");
+  const res = await fetch(STT_URL, { method: "POST", body });
+  if (!res.ok) throw new Error(`stt: ${res.status} ${res.statusText}`);
+  return (await res.text()).trim();
+};
+
+// while held: record the mic
+talk.onpointerdown = async () => {
+  if (held) return;
+  held = true;
+  talk.classList.remove(...IDLE);
+  talk.classList.add(...HELD);
+  live.textContent = "Listening…";
+  let stream: MediaStream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    setIdle();
+    live.textContent = `${(err as Error).name}: ${(err as Error).message}`;
+    return;
   }
-  live.textContent = "";
+  if (!held) {
+    // released while the mic prompt was up
+    stream.getTracks().forEach((t) => t.stop());
+    live.textContent = "";
+    return;
+  }
+  const chunks: Blob[] = [];
+  recorder = new MediaRecorder(stream);
+  recorder.ondataavailable = (e) => chunks.push(e.data);
+  recorder.onstop = async () => {
+    stream.getTracks().forEach((t) => t.stop());
+    live.textContent = "Transcribing…";
+    try {
+      const text = await transcribe(new Blob(chunks));
+      if (text) addBox(text);
+      live.textContent = "";
+    } catch (err) {
+      live.textContent = `${(err as Error).name}: ${(err as Error).message}`;
+    }
+  };
+  recorder.start();
+};
+
+// on release: stop recording, the transcript becomes a box
+const release = () => {
+  if (!held) return;
+  held = false;
+  if (recorder && recorder.state !== "inactive") recorder.stop();
+  recorder = null;
+  setIdle();
 };
 talk.onpointerup = release;
 talk.onpointerleave = release;
@@ -51,4 +85,5 @@ talk.onpointerleave = release;
 reset.onclick = () => {
   release();
   notes.innerHTML = "";
+  live.textContent = "";
 };
