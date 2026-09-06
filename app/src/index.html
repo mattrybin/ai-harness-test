@@ -61,17 +61,8 @@
         cursor: pointer;
         box-shadow: 0 0 0 0 rgba(14, 99, 156, 0.6);
       }
-      #talk.on {
-        background: #f14c4c;
-        animation: pulse 1.2s infinite;
-      }
-      @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(241, 76, 76, 0.6);
-        }
-        100% {
-          box-shadow: 0 0 0 24px rgba(241, 76, 76, 0);
-        }
+      #talk:active {
+        transform: scale(0.95);
       }
     </style>
   </head>
@@ -87,31 +78,28 @@
         "Buy milk, eggs, and the good coffee, not the cheap one.",
         "Meeting notes: Sam owns the deploy, Priya owns the tests, I own the writeup.",
       ];
-      let sampleIndex = 0;
-      let speaking = false;
       let timer = null;
       const talk = document.getElementById("talk");
       const live = document.getElementById("live");
       const notes = document.getElementById("notes");
 
-      function startTalking() {
-        if (speaking) return;
-        speaking = true;
-        talk.classList.add("on");
-        const text = SAMPLES[sampleIndex++ % SAMPLES.length];
+      // while held: keep feeding words in, sentence after sentence
+      talk.onpointerdown = () => {
+        if (timer) return;
+        const words = SAMPLES.join(" ").split(" ");
         let i = 0;
         live.textContent = "";
         timer = setInterval(() => {
-          live.textContent = text.slice(0, ++i);
-          if (i >= text.length) clearInterval(timer);
-        }, 40);
-      }
+          live.textContent += (i ? " " : "") + words[i % words.length];
+          i++;
+        }, 180);
+      };
 
-      function stopTalking() {
-        if (!speaking) return;
-        speaking = false;
-        talk.classList.remove("on");
+      // on release: what was said becomes a box
+      const release = () => {
+        if (!timer) return;
         clearInterval(timer);
+        timer = null;
         if (live.textContent) {
           const box = document.createElement("div");
           box.className = "note";
@@ -119,17 +107,12 @@
           notes.appendChild(box);
         }
         live.textContent = "";
-      }
-
-      talk.onpointerdown = startTalking;
-      talk.onpointerup = stopTalking;
-      talk.onpointerleave = stopTalking;
+      };
+      talk.onpointerup = release;
+      talk.onpointerleave = release;
 
       document.getElementById("reset").onclick = () => {
-        speaking = false;
-        talk.classList.remove("on");
-        clearInterval(timer);
-        live.textContent = "";
+        release();
         notes.innerHTML = "";
       };
     </script>
