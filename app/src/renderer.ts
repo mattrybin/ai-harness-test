@@ -11,6 +11,7 @@ declare const tool: (
   args?: Record<string, string>,
 ) => Promise<unknown>;
 type Entry = { name: string; size: number };
+type Got = { checksum: string; text: string };
 
 const addBox = (text: string) => {
   const box = document.createElement("div");
@@ -27,6 +28,10 @@ const show = (name: string, result: unknown): string => {
     return entries.length
       ? entries.map((e) => `${e.name} (${e.size} B)`).join("\n")
       : "(no files)";
+  }
+  if (name === "get" || name === "edit") {
+    const got = result as Got;
+    return `checksum: ${got.checksum}\n${got.text}`;
   }
   if (name === "grep") {
     const hits = result as string[];
@@ -73,7 +78,8 @@ const refreshFiles = async () => {
 };
 
 // FAKE BRAIN. Stands in for the AI. Ignores what was said and walks
-// shopping.md through: create → fill → (grep, get, delete).
+// shopping.md through: create → (get, fill) → (grep, get, delete).
+// edit and delete need the checksum from get, so get always comes first.
 const act = async (said: string) => {
   const box = addBox(said);
   const entries = (await call(box, "list")) as Entry[];
@@ -81,11 +87,16 @@ const act = async (said: string) => {
   if (!shopping) {
     await call(box, "create", { name: "shopping.md" });
   } else if (shopping.size === 0) {
-    await call(box, "edit", { name: "shopping.md", text: said });
+    const got = (await call(box, "get", { name: "shopping.md" })) as Got;
+    await call(box, "edit", {
+      name: "shopping.md",
+      text: said,
+      checksum: got.checksum,
+    });
   } else {
     await call(box, "grep", { query: said.split(" ")[0] });
-    await call(box, "get", { name: "shopping.md" });
-    await call(box, "delete", { name: "shopping.md" });
+    const got = (await call(box, "get", { name: "shopping.md" })) as Got;
+    await call(box, "delete", { name: "shopping.md", checksum: got.checksum });
   }
   await refreshFiles();
   box.scrollIntoView({ block: "end" });

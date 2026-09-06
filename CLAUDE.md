@@ -5,7 +5,8 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 ## Map
 
 - `app/src/main.ts` — Electron main process. Creates the one window.
-- `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `get`, `delete`, `list`, `grep`) over `notes/`, served over IPC.
+- `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `get`, `delete`, `list`, `grep`) over `notes/`, served over IPC. `edit` and `delete` need the `checksum` that `get` (or a previous `edit`) returned.
+- `app/src/modules/tools.test.ts` — the tool tests. `node --test` against a temp dir, no Electron.
 - `app/src/preload.ts` — exposes `window.tool(name, args)` to the page.
 - `app/src/index.html` — the renderer page the window loads. Tailwind classes, no inline CSS or JS.
 - `app/src/modules/listen.ts` — hold-to-talk: mic recording and the STT call. Hands the transcript to `act()`.
@@ -24,8 +25,8 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 | `make dev` | compile and open the app, and start the STT server beside it |
 | `make stt` | run the local whisper.cpp speech-to-text server (macOS, port 8124) |
 | `make stt-model` | fetch and verify the 1.6 GB model into `models/` without starting the server |
-| `make precommit` | typecheck + format, run before every commit |
-| `make ci` | what CI runs: typecheck + format check, non-mutating |
+| `make precommit` | typecheck + format + tests, run before every commit |
+| `make ci` | what CI runs: typecheck + format check + tests, non-mutating |
 
 ## House rules
 
