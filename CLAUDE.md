@@ -5,12 +5,15 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 ## Map
 
 - `app/src/main.ts` — Electron main process. Creates the one window.
-- `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `get`, `delete`, `list`, `grep`) over `notes/`, served over IPC. `edit` and `delete` need the `checksum` that `get` (or a previous `edit`) returned.
+- `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `get`, `delete`, `list`, `grep`) over `notes/`. `edit` and `delete` need the `checksum` that `get` (or a previous `edit`) returned. Names are `basename`d, so nothing escapes `notes/`. `wipeNotes()` is what Reset calls; it is not a tool.
+- `app/src/modules/mcp.ts` — stdio MCP server over the six tools. `claude` spawns it as `node dist/modules/mcp.js <notesDir>`. Five JSON-RPC methods by hand, no dependency.
+- `app/src/modules/mcp.test.ts` — spawns `dist/modules/mcp.js` and talks JSON-RPC to it. `node --test`, no Electron.
+- `app/src/modules/brain.ts` — the brain: one long-lived `claude -p` per conversation, stream-json both ways, the six tools and nothing else. `say(text)` writes a user turn; every event goes to the page; `reset()` kills it and wipes `notes/`. The system prompt lives here.
 - `app/src/modules/tools.test.ts` — the tool tests. `node --test` against a temp dir, no Electron.
-- `app/src/preload.ts` — exposes `window.tool(name, args)` to the page.
+- `app/src/preload.ts` — exposes `window.tool(name, args)`, `say(text)`, `resetBrain()` and `onBrain(cb)` to the page.
 - `app/src/index.html` — the renderer page the window loads. Tailwind classes, no inline CSS or JS.
 - `app/src/modules/listen.ts` — hold-to-talk: mic recording and the STT call. Hands the transcript to `act()`.
-- `app/src/renderer.ts` — the brain and the tool log. Both page scripts are classic browser scripts, not ES modules, and share one global scope.
+- `app/src/renderer.ts` — the tool log. `act(text)` sends one turn to the brain and renders its events under the box. Both page scripts are classic browser scripts, not ES modules, and share one global scope.
 - `notes/` — files the app writes at runtime. Git-ignored.
 - `app/src/styles.css` — Tailwind v4 entry. `npm run build:css` compiles it.
 - `app/dist/` — `tsc` and Tailwind output. Git-ignored. Never edit.
@@ -35,3 +38,4 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 - Exact versions in `app/package.json`. No `^`, no `~`. Update deps on purpose.
 - Keep it minimal. A new dependency needs a reason written in the PR.
 - The only input is the hold-to-talk button. No text input, no "type it instead" fallback, not even for testing.
+- The brain is the local `claude` login. No API key in the repo, no SDK, no `--bare` (it needs an API key).

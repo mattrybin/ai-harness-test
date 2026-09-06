@@ -37,3 +37,11 @@ terminal app you ran `make dev` from, not under "Electron".
 
 `STT_PORT` overrides the port for `bin/dev` and `bin/stt`. The app itself always calls
 port 8124.
+
+## Brain
+
+What you say goes to one long-lived `claude -p` process, the installed Claude Code CLI on
+your login. It has the six note tools over `notes/` and nothing else, never asks a question,
+and keeps the conversation across holds. Reset kills it and empties `notes/`. Needs `claude`
+on `PATH` and logged in (`claude auth status`), and `node` on `PATH` for the tool server.
+Run `make dev` from a terminal; the app finds `claude` through that shell's `PATH`.
