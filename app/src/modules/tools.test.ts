@@ -3,7 +3,7 @@ import * as assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { makeTools } from "./tools.js";
+import { makeTools, wipeNotes } from "./tools.js";
 
 // every test gets a fresh, empty notes directory
 let dir: string;
@@ -131,4 +131,12 @@ test("a name with a path lands in the notes dir", () => {
   tools.create({ name: "../escape.md" });
   assert.equal(read("escape.md"), "");
   assert.ok(!fs.existsSync(path.join(dir, "..", "escape.md")));
+});
+
+test("wipeNotes removes every .md and leaves other files", () => {
+  tools.create({ name: "a.md" });
+  tools.create({ name: "b.md" });
+  fs.writeFileSync(path.join(dir, "keep.txt"), "x");
+  wipeNotes(dir);
+  assert.deepEqual(fs.readdirSync(dir), ["keep.txt"]);
 });

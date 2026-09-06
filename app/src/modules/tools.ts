@@ -64,8 +64,8 @@ export function makeTools(dir: string): Tools {
 }
 
 // answers window.tool(name, args) from preload.ts. Everything lives in
-// <repo>/notes/.
-export function registerTools(): void {
+// <repo>/notes/; returns that directory.
+export function registerTools(): string {
   const notes = path.join(app.getAppPath(), "..", "notes");
   fs.mkdirSync(notes, { recursive: true });
   const tools = makeTools(notes);
@@ -74,4 +74,12 @@ export function registerTools(): void {
     if (!run) throw new Error(`no tool named ${name}`);
     return run(args);
   });
+  return notes;
+}
+
+// deletes every note in dir. Reset calls this; it is not a tool, so the
+// model cannot.
+export function wipeNotes(dir: string): void {
+  for (const name of fs.readdirSync(dir))
+    if (name.endsWith(".md")) fs.unlinkSync(path.join(dir, name));
 }

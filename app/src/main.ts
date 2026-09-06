@@ -1,8 +1,9 @@
 import { app, BrowserWindow, nativeTheme } from "electron";
 import * as path from "node:path";
+import { registerBrain } from "./modules/brain.js";
 import { registerTools } from "./modules/tools.js";
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   nativeTheme.themeSource = "dark";
   const win = new BrowserWindow({
     width: 900,
@@ -11,11 +12,12 @@ function createWindow(): void {
     webPreferences: { preload: path.join(__dirname, "preload.js") },
   });
   win.loadFile("src/index.html");
+  return win;
 }
 
 app.whenReady().then(() => {
-  registerTools();
-  createWindow();
+  const notes = registerTools();
+  registerBrain(createWindow(), notes);
 });
 
 app.on("window-all-closed", () => {
