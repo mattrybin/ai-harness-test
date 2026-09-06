@@ -86,13 +86,13 @@ const act = async (said: string) => {
     await call(box, "grep", { query: said.split(" ")[0] });
     await call(box, "delete", { name: "shopping.md" });
   }
-  await refreshFiles().catch((err: Error) => {
-    live.textContent = `${err.name}: ${err.message}`;
-  });
+  await refreshFiles();
   box.scrollIntoView({ block: "end" });
 };
 
-refreshFiles();
+refreshFiles().catch((err: Error) => {
+  live.textContent = `${err.name}: ${err.message}`;
+});
 
 reset.onclick = () => {
   release();
