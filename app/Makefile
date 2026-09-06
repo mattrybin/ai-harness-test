@@ -9,9 +9,11 @@ server:
 # Local gate. Formats in place.
 check:
 	npm run precommit
+	npm test
 
 # CI gate. Same checks, nothing mutates.
 ci:
 	npm ci
 	npm run typecheck
 	npm run format:check
+	npm test
