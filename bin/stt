@@ -14,7 +14,7 @@ echo "stt: port=$port model=${model#"$root/"}"
 
 for bin in whisper-server ffmpeg; do
   if ! command -v "$bin" >/dev/null; then
-    echo "stt: $bin not found. Install: brew install whisper-cpp ffmpeg"
+    echo "stt: $bin not found. Install: brew install whisper-cpp ffmpeg" >&2
     exit 1
   fi
 done
@@ -30,7 +30,7 @@ else
   curl -L --fail --progress-bar -o "$model.part" "$url"
   got="$(checksum "$model.part")"
   if [ "$got" != "$sha256" ]; then
-    echo "stt: sha256 mismatch, got $got"
+    echo "stt: sha256 mismatch, got $got" >&2
     rm -f "$model.part"
     exit 1
   fi
