@@ -1,0 +1,19 @@
+# deps
+node_modules/
+
+# build output
+app/dist/
+app/out/
+
+# env
+.env
+.env.*
+
+# editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
