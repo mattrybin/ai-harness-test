@@ -17,7 +17,7 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 | command | does |
 |---|---|
 | `make setup` | fresh clone to runnable (`npm ci`) |
-| `make dev` | compile and open the app |
+| `make dev` | compile and open the app, and start the STT server beside it |
 | `make stt` | run the local whisper.cpp speech-to-text server (macOS, port 8124) |
 | `make stt-model` | fetch and verify the 1.6 GB model into `models/` without starting the server |
 | `make precommit` | typecheck + format, run before every commit |
