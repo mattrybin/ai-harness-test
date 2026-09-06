@@ -1,4 +1,4 @@
-# Front door. Real recipes live in app/Makefile; this file only delegates.
+# Front door. Real recipes live in app/Makefile and bin/; this file only delegates.
 .PHONY: setup dev stt stt-model precommit ci
 
 setup:

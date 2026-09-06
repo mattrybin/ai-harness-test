@@ -7,8 +7,8 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 - `app/src/main.ts` — Electron main process. Creates the one window.
 - `app/src/index.html` — the renderer page the window loads.
 - `app/dist/` — `tsc` output. Git-ignored. Never edit.
-- `app/Makefile` — the real recipes. The root `Makefile` only delegates here.
-- `bin/setup`, `bin/dev`, `bin/stt` — what `make setup`, `make dev` and `make stt` call.
+- `app/Makefile` — the app's recipes. The root `Makefile` only delegates, here or to `bin/`.
+- `bin/setup`, `bin/dev`, `bin/stt` — what `make setup`, `make dev`, `make stt` and `make stt-model` call.
 
 ## Commands (run from the repo root)
 

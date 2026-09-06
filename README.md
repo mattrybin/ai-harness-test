@@ -21,7 +21,7 @@ make dev
 ```
 
 `make precommit` runs the local gate. `make ci` runs what CI runs. Every target lives in
-the root `Makefile` and delegates to `app/Makefile`.
+the root `Makefile` and delegates to `app/Makefile` or a `bin/` script.
 
 ## Speech to text
 
