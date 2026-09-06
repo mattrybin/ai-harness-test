@@ -29,3 +29,4 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 - Run `make precommit` before every commit.
 - Exact versions in `app/package.json`. No `^`, no `~`. Update deps on purpose.
 - Keep it minimal. A new dependency needs a reason written in the PR.
+- The only input is the hold-to-talk button. No text input, no "type it instead" fallback, not even for testing.
