@@ -1,6 +1,6 @@
 import { app, BrowserWindow, nativeTheme } from "electron";
 import * as path from "node:path";
-import { registerTools } from "./tools.js";
+import { registerTools } from "./modules/tools.js";
 
 function createWindow(): void {
   nativeTheme.themeSource = "dark";
