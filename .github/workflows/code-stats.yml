@@ -1,0 +1,58 @@
+name: "CI: Code Stats"
+on:
+  pull_request:
+    branches: [development]
+permissions:
+  pull-requests: write
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  code-stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      UNIT: app
+      EXCLUDE_DIRS: node_modules,dist
+      SCC_VERSION: "3.7.0"
+    steps:
+      - uses: actions/checkout@v5
+        with: { fetch-depth: 0 }
+      - name: Install tools
+        run: |
+          sudo apt-get install -y --no-install-recommends cloc
+          mkdir -p "$HOME/bin"
+          curl -fsSL "https://github.com/boyter/scc/releases/download/v${SCC_VERSION}/scc_Linux_x86_64.tar.gz" | tar -xz -C "$HOME/bin" scc
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+      - name: Generate stats
+        run: |
+          git worktree add /tmp/base-compare origin/development
+          cloc --json --exclude-dir="$EXCLUDE_DIRS" "/tmp/base-compare/$UNIT" > /tmp/base.json
+          cloc --json --exclude-dir="$EXCLUDE_DIRS" "./$UNIT"               > /tmp/current.json
+          git worktree remove /tmp/base-compare
+          diff_summary=$(jq -s -r '
+            def s(n): if n > 0 then "+\(n)" else "\(n)" end;
+            .[0] as $base | .[1] as $cur
+            | $cur | to_entries[] | select(.key | test("^(header|SUM)$") | not)
+            | .key as $lang | .value as $c | ($base[$lang] // {nFiles:0,blank:0,comment:0,code:0}) as $b
+            | select($c.code != $b.code or $c.nFiles != $b.nFiles)
+            | "* **\($lang)**: \(s($c.code - $b.code)) code (\($c.code)), \(s($c.nFiles - $b.nFiles)) files (\($c.nFiles))"
+          ' /tmp/base.json /tmp/current.json)
+          [ -z "$diff_summary" ] && diff_summary="_No code changes._"
+          {
+            echo '## 📊 Code Stats'
+            echo ''
+            echo "### /$UNIT"
+            echo '```'
+            scc "./$UNIT" --exclude-dir "$EXCLUDE_DIRS"
+            echo '```'
+            echo ''
+            echo '### Diff vs development'
+            echo ''
+            echo "$diff_summary"
+          } > /tmp/stats.md
+      - name: Post PR comment
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          path: /tmp/stats.md
