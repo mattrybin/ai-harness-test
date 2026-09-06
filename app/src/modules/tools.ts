@@ -13,7 +13,6 @@ export function makeTools(dir: string): Tools {
   // basename keeps every name inside dir, so "../x.md" cannot escape
   const file = (name: string) => path.join(dir, path.basename(name));
   const mdFiles = () => fs.readdirSync(dir).filter((n) => n.endsWith(".md"));
-  // first 8 hex chars of sha256 over the file's bytes
   const hash = (bytes: Buffer) =>
     createHash("sha256").update(bytes).digest("hex").slice(0, 8);
   const sum = (name: string) => hash(fs.readFileSync(file(name)));
