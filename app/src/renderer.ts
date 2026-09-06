@@ -73,7 +73,7 @@ const refreshFiles = async () => {
 };
 
 // FAKE BRAIN. Stands in for the AI. Ignores what was said and walks
-// shopping.md through: create → fill → (list, grep, delete).
+// shopping.md through: create → fill → (grep, get, delete).
 const act = async (said: string) => {
   const box = addBox(said);
   const entries = (await call(box, "list")) as Entry[];
@@ -84,6 +84,7 @@ const act = async (said: string) => {
     await call(box, "edit", { name: "shopping.md", text: said });
   } else {
     await call(box, "grep", { query: said.split(" ")[0] });
+    await call(box, "get", { name: "shopping.md" });
     await call(box, "delete", { name: "shopping.md" });
   }
   await refreshFiles();

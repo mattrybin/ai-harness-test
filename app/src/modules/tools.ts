@@ -22,6 +22,7 @@ const tools: Record<string, (args: Args) => unknown> = {
     fs.unlinkSync(file(name));
     return `deleted ${name}`;
   },
+  get: ({ name }) => fs.readFileSync(file(name), "utf8"),
   list: () =>
     mdFiles().map((name) => ({ name, size: fs.statSync(file(name)).size })),
   grep: ({ query }) => {

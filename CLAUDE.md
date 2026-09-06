@@ -5,7 +5,7 @@ One unit: `app/`, a minimal Electron app written in TypeScript. No framework, no
 ## Map
 
 - `app/src/main.ts` — Electron main process. Creates the one window.
-- `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `delete`, `list`, `grep`) over `notes/`, served over IPC.
+- `app/src/modules/tools.ts` — the note tools (`create`, `edit`, `get`, `delete`, `list`, `grep`) over `notes/`, served over IPC.
 - `app/src/preload.ts` — exposes `window.tool(name, args)` to the page.
 - `app/src/index.html` — the renderer page the window loads. Tailwind classes, no inline CSS or JS.
 - `app/src/modules/listen.ts` — hold-to-talk: mic recording and the STT call. Hands the transcript to `act()`.
