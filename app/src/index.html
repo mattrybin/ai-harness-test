@@ -5,151 +5,125 @@
     <meta name="color-scheme" content="dark" />
     <title>app</title>
     <style>
-      :root {
-        --bg: #1e1e1e;
-        --panel: #252526;
-        --border: #3c3c3c;
-        --text: #d4d4d4;
-        --muted: #8b8b8b;
-        --accent: #4fc1ff;
-      }
       body {
         margin: 0;
-        background: var(--bg);
-        color: var(--text);
+        height: 100vh;
+        background: #1e1e1e;
+        color: #d4d4d4;
         font:
-          14px/1.5 -apple-system,
+          15px/1.5 -apple-system,
           "Segoe UI",
           sans-serif;
-        display: grid;
-        grid-template-columns: 200px 1fr;
-        height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
-      nav {
-        background: var(--panel);
-        border-right: 1px solid var(--border);
-        padding: 12px;
+      #reset {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        background: transparent;
+        color: #8b8b8b;
+        border: 1px solid #3c3c3c;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
       }
-      nav h2 {
-        margin: 0 0 12px;
-        font-size: 12px;
-        color: var(--muted);
-        text-transform: uppercase;
-      }
-      nav a {
-        display: block;
-        color: var(--text);
-        text-decoration: none;
-        padding: 6px 8px;
-        border-radius: 4px;
-      }
-      nav a.active {
-        background: #37373d;
-        color: var(--accent);
-      }
-      main {
-        padding: 24px;
+      #notes {
+        flex: 1;
         overflow: auto;
+        padding: 64px 24px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
-      h1 {
-        margin: 0 0 4px;
-        font-size: 20px;
+      .note {
+        background: #252526;
+        border: 1px solid #3c3c3c;
+        border-radius: 8px;
+        padding: 12px 16px;
       }
-      .sub {
-        color: var(--muted);
-        margin-bottom: 20px;
+      #live {
+        min-height: 60px;
+        padding: 0 24px 16px;
+        color: #8b8b8b;
+        font-style: italic;
       }
-      table {
-        border-collapse: collapse;
-        width: 100%;
-      }
-      th,
-      td {
-        text-align: left;
-        padding: 8px;
-        border-bottom: 1px solid var(--border);
-      }
-      th {
-        color: var(--muted);
-        font-weight: 500;
-      }
-      .ok {
-        color: #89d185;
-      }
-      .warn {
-        color: #cca700;
-      }
-      .err {
-        color: #f14c4c;
-      }
-      button {
+      #talk {
+        align-self: center;
+        margin-bottom: 40px;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        border: 0;
         background: #0e639c;
         color: #fff;
-        border: 0;
-        padding: 6px 12px;
-        border-radius: 4px;
+        font-size: 36px;
+        cursor: pointer;
+        box-shadow: 0 0 0 0 rgba(14, 99, 156, 0.6);
+      }
+      #talk.on {
+        background: #f14c4c;
+        animation: pulse 1.2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(241, 76, 76, 0.6);
+        }
+        100% {
+          box-shadow: 0 0 0 24px rgba(241, 76, 76, 0);
+        }
       }
     </style>
   </head>
   <body>
-    <nav>
-      <h2>Harness</h2>
-      <a class="active" href="#">Runs</a>
-      <a href="#">Models</a>
-      <a href="#">Speech</a>
-      <a href="#">Settings</a>
-    </nav>
-    <main>
-      <h1>Runs</h1>
-      <div class="sub">Dummy data. 6 rows.</div>
-      <table>
-        <tr>
-          <th>Name</th>
-          <th>Model</th>
-          <th>Status</th>
-          <th>Time</th>
-        </tr>
-        <tr>
-          <td>whisper smoke test</td>
-          <td>ggml-large-v3</td>
-          <td class="ok">ok</td>
-          <td>1.2s</td>
-        </tr>
-        <tr>
-          <td>
-            long dictation, background noise, two speakers talking over each
-            other
-          </td>
-          <td>ggml-large-v3</td>
-          <td class="warn">slow</td>
-          <td>48.7s</td>
-        </tr>
-        <tr>
-          <td>empty audio</td>
-          <td>ggml-large-v3</td>
-          <td class="err">failed</td>
-          <td>0.1s</td>
-        </tr>
-        <tr>
-          <td>french sample</td>
-          <td>ggml-medium</td>
-          <td class="ok">ok</td>
-          <td>3.4s</td>
-        </tr>
-        <tr>
-          <td>numbers and dates</td>
-          <td>ggml-medium</td>
-          <td class="ok">ok</td>
-          <td>2.0s</td>
-        </tr>
-        <tr>
-          <td>model missing</td>
-          <td>ggml-tiny</td>
-          <td class="err">failed</td>
-          <td>—</td>
-        </tr>
-      </table>
-      <p><button>New run</button></p>
-    </main>
+    <button id="reset">Reset</button>
+    <div id="notes"></div>
+    <div id="live"></div>
+    <button id="talk">🎤</button>
+    <script>
+      const SAMPLES = [
+        "Remind me to call the dentist tomorrow at nine.",
+        "Okay so the idea is we keep the harness tiny and only add one thing per step.",
+        "Buy milk, eggs, and the good coffee, not the cheap one.",
+        "Meeting notes: Sam owns the deploy, Priya owns the tests, I own the writeup.",
+      ];
+      let sampleIndex = 0;
+      let speaking = false;
+      let timer = null;
+      const talk = document.getElementById("talk");
+      const live = document.getElementById("live");
+      const notes = document.getElementById("notes");
+
+      talk.onclick = () => {
+        if (!speaking) {
+          speaking = true;
+          talk.classList.add("on");
+          const text = SAMPLES[sampleIndex++ % SAMPLES.length];
+          let i = 0;
+          live.textContent = "";
+          timer = setInterval(() => {
+            live.textContent = text.slice(0, ++i);
+            if (i >= text.length) clearInterval(timer);
+          }, 40);
+        } else {
+          speaking = false;
+          talk.classList.remove("on");
+          clearInterval(timer);
+          const box = document.createElement("div");
+          box.className = "note";
+          box.textContent = live.textContent;
+          notes.appendChild(box);
+          live.textContent = "";
+        }
+      };
+
+      document.getElementById("reset").onclick = () => {
+        speaking = false;
+        talk.classList.remove("on");
+        clearInterval(timer);
+        live.textContent = "";
+        notes.innerHTML = "";
+      };
+    </script>
   </body>
 </html>
