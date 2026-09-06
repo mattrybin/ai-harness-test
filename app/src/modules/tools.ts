@@ -40,7 +40,8 @@ export function makeTools(dir: string): Tools {
       fs.appendFileSync(file(name), text + "\n");
       return read(name);
     },
-    delete: ({ name }) => {
+    delete: ({ name, checksum }) => {
+      check(name, checksum);
       fs.unlinkSync(file(name));
       return `deleted ${name}`;
     },

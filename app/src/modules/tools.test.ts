@@ -103,8 +103,26 @@ test("grep matches lines case-insensitively with file and line number", () => {
   assert.deepEqual(tools.grep({ query: "milk" }), ["a.md:1: Milk"]);
 });
 
-test("delete removes the file", () => {
+test("delete with the checksum from get removes the file", () => {
   tools.create({ name: "a.md" });
-  assert.equal(tools.delete({ name: "a.md" }), "deleted a.md");
+  const checksum = sumOf("a.md");
+  assert.equal(tools.delete({ name: "a.md", checksum }), "deleted a.md");
   assert.equal(fs.existsSync(path.join(dir, "a.md")), false);
+});
+
+test("delete without a checksum is refused and the file stays", () => {
+  tools.create({ name: "a.md" });
+  assert.throws(() => tools.delete({ name: "a.md" }), /checksum required/);
+  assert.equal(fs.existsSync(path.join(dir, "a.md")), true);
+});
+
+test("delete with a stale checksum is refused and the file stays", () => {
+  tools.create({ name: "a.md" });
+  const stale = sumOf("a.md");
+  add("a.md", "milk");
+  assert.throws(
+    () => tools.delete({ name: "a.md", checksum: stale }),
+    /checksum stale/,
+  );
+  assert.equal(read("a.md"), "milk\n");
 });
