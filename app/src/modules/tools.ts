@@ -4,7 +4,8 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 // The note tools. The brain (claude, see brain.ts) calls these over the
-// MCP server in mcp.ts; the page calls list over IPC.type Args = Record<string, string>;
+// MCP server in mcp.ts; the page calls list over IPC.
+type Args = Record<string, string>;
 type Tools = Record<string, (args: Args) => unknown>;
 
 // The six tools over one flat directory of .md files.
