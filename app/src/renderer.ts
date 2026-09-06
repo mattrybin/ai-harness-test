@@ -83,10 +83,12 @@ const act = async (said: string) => {
   } else if (shopping.size === 0) {
     await call(box, "edit", { name: "shopping.md", text: said });
   } else {
-    await call(box, "grep", { query: said.split(" ")[0] ?? "" });
+    await call(box, "grep", { query: said.split(" ")[0] });
     await call(box, "delete", { name: "shopping.md" });
   }
-  await refreshFiles();
+  await refreshFiles().catch((err: Error) => {
+    live.textContent = `${err.name}: ${err.message}`;
+  });
   box.scrollIntoView({ block: "end" });
 };
 
