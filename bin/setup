@@ -1,0 +1,18 @@
+#!/bin/sh
+# One command from a fresh — or stale — clone to a checkout `make dev` boots.
+# Every step runs unconditionally: a setup that decides what to skip is one
+# you re-check by hand afterwards. Guards first, so a missing tool fails now.
+set -eu
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd); cd "$root"
+die() { printf '\nbin/setup: %s\n' "$*" >&2; exit 1; }
+step() { printf '\n==> %s\n' "$*"; }
+
+step "Checking tools"
+command -v node >/dev/null 2>&1 || die "node not found — see .tool-versions"
+command -v npm  >/dev/null 2>&1 || die "npm not found — see .tool-versions"
+
+step "Install"
+make -C app install
+
+step "Done"
+echo "  Run \`make dev\`."
