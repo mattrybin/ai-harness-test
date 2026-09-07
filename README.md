@@ -6,6 +6,8 @@ So what I would do next is to create a state machine of this "brain" and add rea
 
 I only worked inside one session as to have one session file to send, normally I would work with many sessions at once.
 
+-------------------
+
 A minimal Electron app in TypeScript. One window, one hold-to-talk button, and a `claude`
 process behind it that keeps a folder of markdown notes.
 
@@ -21,6 +23,7 @@ the Claude Code CLI logged in (`claude auth status`).
 
 ```sh
 make setup
+make stt
 make dev
 ```
 
